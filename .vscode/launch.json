@@ -10,8 +10,8 @@
             "request": "launch",
             "program": "net2mat.exe",
             "args": [
-                // "GasLib-582-v2.net",
-                // "C:/Users/kipr/Downloads/GasLib-582-v2/"
+                "test_data/GasLib-11.net",
+                "demo.mat"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

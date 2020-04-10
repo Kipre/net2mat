@@ -38,11 +38,12 @@ int main(int argc, char **argv)
 {   
     mat_t *matfp;
     matvar_t *matvar;
-    unsigned int nb_nodes, nb_connections, max_node_string = 0, max_connection_string = 0;
+    unsigned int nb_nodes, nb_connections, nb_sources, max_node_string = 0, max_connection_string = 0;
     int to, from, *incidence_matrix;
     double roughness, diameter, length, height, pressure_min, pressure_max;
-    double *roughnesses, *diameters, *lengths, *heights, *pressure_mins, *pressure_maxes;
+    double *roughnesses, *diameters, *lengths, *heights, *pressure_mins, *pressure_maxes, *temperatures;
     char *nodes_order, *connections_order;
+    std::vector<double> temperatures_vect;
     std::string output_path, input_path;
     std::string from_id, to_id, node_id, connection_id;
     std::map<std::string, std::tuple<double, double, double>> nodes_data;
@@ -88,7 +89,7 @@ int main(int argc, char **argv)
         std::cerr << "Error opening " << input_path << " file"<< std::endl;
         return EXIT_FAILURE;
     }
-    std::cout << "Opened .net with success" << std::endl;
+    std::cout << "Opened "<< input_path << " with success"<< std::endl;;
 
     /* Fetching node characteristics */ 
     for (pugi::xml_node node: doc.child("network").child("framework:nodes"))
@@ -101,16 +102,28 @@ int main(int argc, char **argv)
         if (node_id.length() > max_node_string) {
             max_node_string = node_id.length();
         }
+        std::string tmp(node.name());
+        if (tmp == "source") {
+            temperatures_vect.push_back(node.child("gasTemperature").attribute("value").as_double());
+        }
     }
     nb_nodes = nodes_data.size();
+    nb_sources = temperatures_vect.size();
     std::cout << "Fetched data for nodes, found " << nb_nodes << " nodes" << std::endl;
 
     /* Fetching connection characteristics */ 
     for (pugi::xml_node connection: doc.child("network").child("framework:connections"))
-    {
-        roughness = connection.child("roughness").attribute("value").as_double();
-        diameter = connection.child("diameter").attribute("value").as_double();
-        length = connection.child("length").attribute("value").as_double();
+    {   
+        std::string tmp(connection.name());
+        if (tmp == "pipe") {
+            roughness = connection.child("roughness").attribute("value").as_double();
+            diameter = connection.child("diameter").attribute("value").as_double();
+            length = connection.child("length").attribute("value").as_double();
+        } else {
+            roughness = 0;
+            diameter = 0;
+            length = 0;
+        }
         from_id = connection.attribute("from").value();
         to_id = connection.attribute("to").value();
         from = std::distance(nodes_data.begin(), nodes_data.find(from_id));
@@ -125,16 +138,15 @@ int main(int argc, char **argv)
     std::cout << "Fetched data for connections, found " << nb_connections << " connections" << std::endl;
 
     /* Making the incidence matrix and characteristics related to connections*/
-    nb_nodes = nodes_data.size();
-    incidence_matrix = new int [nb_nodes * nb_connections];
+    incidence_matrix = new int [nb_nodes * nb_connections]{0};
     roughnesses = new double [nb_connections];
     diameters = new double [nb_connections];
     lengths = new double [nb_connections];
     connections_order = new char [nb_connections*max_connection_string];
     int counter = 0;
-    for( auto const& [id, val] : connections_data )
+    for ( auto const& [id, val] : connections_data )
     {
-        std::tie(roughness, diameter, length, to, from) = val;
+        std::tie(roughness, diameter, length, from, to) = val;
         incidence_matrix[counter*nb_nodes + from]--;
         incidence_matrix[counter*nb_nodes + to]++;
         roughnesses[counter] = roughness;
@@ -174,6 +186,10 @@ int main(int argc, char **argv)
         }
         counter++;
     }
+
+    temperatures = new double [nb_sources];
+    temperatures = &temperatures_vect[0];
+
     std::cout << "Transformed nodes data" << std::endl;
 
     /* Creating matrices and loading them into the file */
@@ -182,6 +198,7 @@ int main(int argc, char **argv)
     size_t nodes_dims[2] = {1, nb_nodes};
     size_t connections_order_dims[2] = {nb_connections, max_connection_string};
     size_t nodes_order_dims[2] = {nb_nodes, max_node_string};
+    size_t temperature_dims[2] = {1, nb_sources};
     
     matfp = Mat_CreateVer(output_path.c_str(), NULL, MAT_FT_DEFAULT);
     if ( NULL == matfp ) {
@@ -209,6 +226,9 @@ int main(int argc, char **argv)
     write_and_free(matvar, matfp);
 
     matvar = Mat_VarCreate("height", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, nodes_dims, heights, 0);
+    write_and_free(matvar, matfp);
+
+    matvar = Mat_VarCreate("temperature", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, temperature_dims, temperatures, 0);
     write_and_free(matvar, matfp);
 
     matvar = Mat_VarCreate("connections_order", MAT_C_CHAR, MAT_T_UINT8, 2, connections_order_dims, connections_order, 0);
