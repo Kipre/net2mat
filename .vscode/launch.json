@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "cl.exe - Build and debug active file",
+            "name": "cl.exe - Build and debug net2mat",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "program": "net2mat.exe",
             "args": [
                 // "GasLib-582-v2.net",
                 // "C:/Users/kipr/Downloads/GasLib-582-v2/"
@@ -17,7 +17,7 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "preLaunchTask": "cl.exe build active file"
+            "preLaunchTask": "cl.exe build net2mat"
         }
     ]
 }

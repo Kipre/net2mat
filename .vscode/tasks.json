@@ -3,21 +3,21 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "cl.exe build active file",
+            "label": "cl.exe build net2mat",
             "command": "cl.exe",
             "args": [
                 "/std:c++17",
                 "/Zi",
                 "/EHsc",
                 "/Fe:",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "${file}",
-                "pugixml.cpp",
-				"io.c",
-				"mat.c",
-				"mat4.c",
-				"endian.c",
-				"read_data.c"
+                "net2mat.exe",
+                "src\\net2mat.cpp",
+                "src\\pugixml.cpp",
+				"src\\io.c",
+				"src\\mat.c",
+				"src\\mat4.c",
+				"src\\endian.c",
+				"src\\read_data.c"
             ],
             "problemMatcher": [
                 "$msCompile"
