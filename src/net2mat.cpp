@@ -4,6 +4,7 @@
 #include "pugixml.hpp"
 #include "matio.h"
 #include <filesystem>
+#include <vector>
  
 namespace fs = std::filesystem;
 
@@ -52,23 +53,22 @@ int main(int argc, char **argv)
     /* Reading the arguments */
     if (argc == 3 || argc == 2) {
         input_path = argv[1];
-        std::string output_filename = getFileName(input_path, false);
-        struct stat s;
+        fs::path first_path = fs::path(argv[1]);
         if (argc == 3) {
-            if (fs::path(argv[2]).extension() == fs::path("/foo/bar.mat").extension()) {
-                output_path = argv[2];
-            } else if( stat(argv[2], &s) == 0 ) {
-                if( s.st_mode & S_IFDIR ) {
-                    output_filename = output_filename.insert(0, argv[2]) + ".mat";
-                    output_path = output_filename;
-                } else {
-                    std::cerr << "Output path not understood" << std::endl;
-                }
+            fs::path second_path = fs::path(argv[2]);
+            if (second_path.extension() == fs::path("/foo/bar.mat").extension()) {
+                output_path = second_path.string();
+            } else if (!second_path.has_filename()) {
+                second_path += first_path.filename().replace_extension(".mat");
+                output_path = second_path.string();
+            } else if (!second_path.has_extension()) {
+                second_path /= first_path.filename().replace_extension(".mat");
+                output_path = second_path.string();
             } else {
-                std::cerr << "Output path not understood" << std::endl;
+                std::cerr << "Output path was not understood." << std::endl;
             }
         } else if (argc == 2) {
-            output_path = fs::path(input_path).replace_extension(".mat").string();
+            output_path = first_path.replace_extension(".mat").string();
         }
     } else {
         std::cerr << "Wrong number of arguments, the call syntax is one of the following:" << std::endl
@@ -202,7 +202,9 @@ int main(int argc, char **argv)
     
     matfp = Mat_CreateVer(output_path.c_str(), NULL, MAT_FT_DEFAULT);
     if ( NULL == matfp ) {
-        std::cerr << "Error creating MAT file " << output_path << std::endl;
+        std::cerr << "Error creating MAT file " << output_path 
+                  << ". Check that the output path was correct." 
+                  << std::endl;
         return EXIT_FAILURE;
     }
     std::cout << "Created the " << output_path << " file" << std::endl;

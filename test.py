@@ -4,6 +4,7 @@ from scipy.io import loadmat, savemat
 from lxml import etree
 import subprocess
 import os
+import sys
 
 
 def net2mat(xml, output):
@@ -79,25 +80,33 @@ def net2mat(xml, output):
 
     # Saving the network
     savemat(output, 
-                {'incidence_matrix' : incidence_matrix,
-                'roughness' : roughness,
-                'diameter' : diameter,
-                'temperature' : temperature,
-                'pressure_min' : pressure_min,
-                'pressure_max' : pressure_max,
-                'length' : length,
-                'height' : height,
-                'nodes_order' : nodes_order,
-                'connections_order' : connections_order})
+            {'incidence_matrix' : incidence_matrix,
+            'roughness' : roughness,
+            'diameter' : diameter,
+            'temperature' : temperature,
+            'pressure_min' : pressure_min,
+            'pressure_max' : pressure_max,
+            'length' : length,
+            'height' : height,
+            'nodes_order' : nodes_order,
+            'connections_order' : connections_order})
 
 def reorder(py_order, cli_order):
     py_order = [a.strip() for a in list(py_order)]
     cli_order = list(cli_order)
     return [py_order.index(a) for a in cli_order]
 
+# Check what os we are on
+if sys.platform.startswith("win"):
+    command = 'net2mat'
+elif sys.platform.startswith("linux"):
+    command = './net2mat'
+else:
+    raise ImportError("This tst module doesn't support this system")
+
 
 # Checking that there is no output without arguments
-assert subprocess.run(["net2mat"], capture_output=True).returncode == 1
+assert subprocess.run([command], capture_output=True).returncode == 1
 
 # Checking with all the networks
 test_directory = 'test_data/'
@@ -110,7 +119,7 @@ for file in net_files:
     net2mat(test_directory + file, 'py.mat')
 
     print(f'Doing {file} in net2mat')
-    assert subprocess.run(["net2mat", test_directory + file, "cli.mat"], capture_output=True).returncode == 0
+    assert subprocess.run([command, test_directory + file, "cli.mat"], capture_output=True).returncode == 0
 
     py_mat = loadmat("py.mat")
     cli_mat = loadmat("cli.mat")
