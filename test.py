@@ -99,26 +99,34 @@ def reorder(py_order, cli_order):
 # Check what os we are on
 if sys.platform.startswith("win"):
     command = 'net2mat'
+    print("Using Windows command.")
 elif sys.platform.startswith("linux"):
     command = './net2mat'
+    print("Using Linux command.")
 else:
     raise ImportError("This tst module doesn't support this system")
 
 
-# Checking that there is no output without arguments
+# Check call syntax
+print("Checking call syntax.")
+assert subprocess.run([command, 'abcd', 'efgh'], capture_output=True).returncode == 1
+assert subprocess.run([command, 'abcd'], capture_output=True).returncode == 1
 assert subprocess.run([command], capture_output=True).returncode == 1
+assert subprocess.run([command, 'test_data/Gaslib-11.net'], capture_output=True).returncode == 0
+assert subprocess.run([command, 'test_data/Gaslib-11.net', 'cli.mat'], capture_output=True).returncode == 0
 
 # Checking with all the networks
+print("Launching tests.")
 test_directory = 'test_data/'
 subjects = {'connections_order':['roughness', 'diameter', 'length'],
             'nodes_order':['pressure_min', 'pressure_max', 'height']}
 
-net_files = [os.fsdecode(file) for file in os.listdir(test_directory)]
+net_files = [os.fsdecode(file) for file in os.listdir(test_directory) if file[-4:] == ".net"]
 for file in net_files:
-    print(f'Doing {file} in python')
+    print(f'Converting {file} in python')
     net2mat(test_directory + file, 'py.mat')
 
-    print(f'Doing {file} in net2mat')
+    print(f'Converting {file} in net2mat')
     assert subprocess.run([command, test_directory + file, "cli.mat"], capture_output=True).returncode == 0
 
     py_mat = loadmat("py.mat")
@@ -129,14 +137,14 @@ for file in net_files:
     for subject, keys in subjects.items():
         reorderings[subject] = reorder(py_mat[subject], cli_mat[subject])
         for key in keys:
-            print(key)
+            print(f"    {key}")
             reordering = reorder(py_mat[subject], cli_mat[subject])
             if not np.allclose(cli_mat[key], py_mat[key][0, reorderings[subject]]):
                 print(cli_mat[key] - py_mat[key][0, reorderings[subject]])
                 print(cli_mat[key])
                 print(cli_mat[subject])
                 raise Exception(f"Difference found in {key}.")
-
+    print('\tincidence_matrix')
     if not np.allclose(cli_mat['incidence_matrix'], py_mat['incidence_matrix'][reorderings['nodes_order'], :][:, reorderings['connections_order']]):
                 print(cli_mat['incidence_matrix'] - py_mat['incidence_matrix'][reorderings['nodes_order'], :][:, reorderings['connections_order']])
                 print(py_mat['incidence_matrix'])
@@ -145,6 +153,12 @@ for file in net_files:
                 print(cli_mat['nodes_order'])
                 print(cli_mat['connections_order'])
                 raise Exception("Difference found in incidence matrix.")
+
+
+print("Removing temporary files.")
+os.remove('test_data/Gaslib-11.mat')
+os.remove("py.mat")
+os.remove("cli.mat")
 
 print('OK')
 
