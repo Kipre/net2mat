@@ -8,7 +8,6 @@ import sys
 
 
 def net2mat(xml, output):
-    
     with open(xml)as f:
         raw = f.read()
 
@@ -63,12 +62,12 @@ def net2mat(xml, output):
         temperature[i] = source.find('{http://gaslib.zib.de/Gas}gasTemperature').get('value')
 
     # Saving the orders
-    nodes_order = ['' for k in range(len(node_ids.keys()))] 
+    nodes_order = ['' for k in range(len(node_ids.keys()))]
     for node in node_ids.keys():
         nodes_order[node_ids[node]] = node
     connections_order = ['' for k in range(len(connection_ids.keys()))]
     for connection in connection_ids.keys():
-        connections_order[connection_ids[connection]] = connection 
+        connections_order[connection_ids[connection]] = connection
 
     roughness = np.array(roughness, dtype=np.float64)
     diameter = np.array(diameter, dtype=np.float64)
@@ -79,22 +78,24 @@ def net2mat(xml, output):
     height = np.array(height, dtype=np.float64)
 
     # Saving the network
-    savemat(output, 
-            {'incidence_matrix' : incidence_matrix,
-            'roughness' : roughness,
-            'diameter' : diameter,
-            'temperature' : temperature,
-            'pressure_min' : pressure_min,
-            'pressure_max' : pressure_max,
-            'length' : length,
-            'height' : height,
-            'nodes_order' : nodes_order,
-            'connections_order' : connections_order})
+    savemat(output,
+            {'incidence_matrix': incidence_matrix,
+             'roughness': roughness,
+             'diameter': diameter,
+             'temperature': temperature,
+             'pressure_min': pressure_min,
+             'pressure_max': pressure_max,
+             'length': length,
+             'height': height,
+             'nodes_order': nodes_order,
+             'connections_order': connections_order})
+
 
 def reorder(py_order, cli_order):
     py_order = [a.strip() for a in list(py_order)]
     cli_order = list(cli_order)
     return [py_order.index(a) for a in cli_order]
+
 
 # Check what os we are on
 if sys.platform.startswith("win"):
@@ -105,7 +106,6 @@ elif sys.platform.startswith("linux"):
     print("Using Linux command.")
 else:
     raise ImportError("This tst module doesn't support this system")
-
 
 # Check call syntax
 print("Checking call syntax.")
@@ -118,8 +118,8 @@ assert subprocess.run([command, 'test_data/Gaslib-11.net', 'cli.mat'], capture_o
 # Checking with all the networks
 print("Launching tests.")
 test_directory = 'test_data/'
-subjects = {'connections_order':['roughness', 'diameter', 'length'],
-            'nodes_order':['pressure_min', 'pressure_max', 'height']}
+subjects = {'connections_order': ['roughness', 'diameter', 'length'],
+            'nodes_order': ['pressure_min', 'pressure_max', 'height']}
 
 net_files = [os.fsdecode(file) for file in os.listdir(test_directory) if file[-4:] == ".net"]
 for file in net_files:
@@ -145,15 +145,16 @@ for file in net_files:
                 print(cli_mat[subject])
                 raise Exception(f"Difference found in {key}.")
     print('\tincidence_matrix')
-    if not np.allclose(cli_mat['incidence_matrix'], py_mat['incidence_matrix'][reorderings['nodes_order'], :][:, reorderings['connections_order']]):
-                print(cli_mat['incidence_matrix'] - py_mat['incidence_matrix'][reorderings['nodes_order'], :][:, reorderings['connections_order']])
-                print(py_mat['incidence_matrix'])
-                print(py_mat['incidence_matrix'][reorderings['nodes_order'], :][:, reorderings['connections_order']])
-                print(cli_mat['incidence_matrix'])
-                print(cli_mat['nodes_order'])
-                print(cli_mat['connections_order'])
-                raise Exception("Difference found in incidence matrix.")
-
+    if not np.allclose(cli_mat['incidence_matrix'],
+                       py_mat['incidence_matrix'][reorderings['nodes_order'], :][:, reorderings['connections_order']]):
+        print(cli_mat['incidence_matrix'] - py_mat['incidence_matrix'][reorderings['nodes_order'], :][:,
+                                            reorderings['connections_order']])
+        print(py_mat['incidence_matrix'])
+        print(py_mat['incidence_matrix'][reorderings['nodes_order'], :][:, reorderings['connections_order']])
+        print(cli_mat['incidence_matrix'])
+        print(cli_mat['nodes_order'])
+        print(cli_mat['connections_order'])
+        raise Exception("Difference found in incidence matrix.")
 
 print("Removing temporary files.")
 os.remove('test_data/Gaslib-11.mat')
@@ -161,5 +162,3 @@ os.remove("py.mat")
 os.remove("cli.mat")
 
 print('OK')
-
-

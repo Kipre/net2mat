@@ -71,10 +71,10 @@ int main(int argc, char **argv)
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(input_path.c_str());
     if (!result) {
-        std::cerr << "Error opening " << input_path << " file"<< std::endl;
+        std::cerr << "Error opening " << input_path << " file."<< std::endl;
         return EXIT_FAILURE;
     }
-    std::cout << "Opened "<< input_path << " with success"<< std::endl;;
+    std::cout << "Opened "<< input_path << " with success."<< std::endl;;
 
     /* Fetching node characteristics */ 
     for (pugi::xml_node node: doc.child("network").child("framework:nodes"))
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         }
     }
     nb_connections = connections_data.size();
-    std::cout << "Fetched data for connections, found " << nb_connections << " connections" << std::endl;
+    std::cout << "Fetched data for connections, found " << nb_connections << " connections." << std::endl;
 
     /* Making the incidence matrix and characteristics related to connections*/
     incidence_matrix = new int [nb_nodes * nb_connections]{0};
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
         }
         counter++;
     }
-    std::cout << "Made incidence matrix and transformed connections data" << std::endl;
+    std::cout << "Made incidence matrix and transformed connections data." << std::endl;
 
     /* Characteristics related to the nodes */
     pressure_mins = new double [nb_nodes];
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
     temperatures = new double [nb_sources];
     temperatures = &temperatures_vect[0];
 
-    std::cout << "Transformed nodes data" << std::endl;
+    std::cout << "Transformed nodes data." << std::endl;
 
     /* Creating matrices and loading them into the file */
     size_t incidence_dims[2] = {nb_nodes, nb_connections};
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
                   << std::endl;
         return EXIT_FAILURE;
     }
-    std::cout << "Created the " << output_path << " file" << std::endl;
+    std::cout << "Created the " << output_path << " file." << std::endl;
 
     matvar = Mat_VarCreate("incidence_matrix", MAT_C_INT32, MAT_T_INT32, 2, incidence_dims, incidence_matrix, 0);
     write_and_free(matvar, matfp);
@@ -224,10 +224,10 @@ int main(int argc, char **argv)
     matvar = Mat_VarCreate("nodes_order", MAT_C_CHAR, MAT_T_UINT8, 2, nodes_order_dims, nodes_order, 0);
     write_and_free(matvar, matfp);
 
-    std::cout << "Wrote everithing" << std::endl;
+    std::cout << "Wrote everything." << std::endl;
 
     Mat_Close(matfp);
-    std::cout << "Done" << std::endl;
+    std::cout << "Done." << std::endl;
 }
 
     
