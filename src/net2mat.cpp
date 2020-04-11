@@ -1,29 +1,14 @@
 #include <iostream>
 #include <iterator>
 #include <map>
-#include "pugixml.hpp"
-#include "matio.h"
 #include <filesystem>
 #include <vector>
- 
+#include "pugixml.hpp"
+#include "matio.h"
+
 namespace fs = std::filesystem;
 
 /* Utility functions */
-std::string getFileName(std::string filePath, bool withExtension = true)
-{
-	fs::path pathObj(filePath);
- 	if(withExtension == false) {
-		if(pathObj.has_stem()) {
-			return pathObj.stem().string();
-		}
-		return "";
-	}
-	else {
-		return pathObj.filename().string();
-	}
- 
-}
-
 void write_and_free(matvar_t *matvar, mat_t *matfp)
 {
     if ( NULL == matvar ) {
