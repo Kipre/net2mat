@@ -29,3 +29,17 @@ Created the C:\Users\kipr\Downloads\GasLib-11.mat file
 Wrote everithing
 Done
 ```
+ 
+## Output
+
+The `network.mat` file contains all the information about the network:
+ - `incidence_matrix`
+ - `roughness`
+ - `length`
+ - `diameter`
+ - `temperature`
+ - `pressure_min`
+ - `pressure_max`
+ - `height`
+ - `nodes_order`
+ - `connections_order`. 
