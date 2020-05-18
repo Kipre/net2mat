@@ -9,7 +9,7 @@
 ## Examples 
 
 ```
-C:\Users\kipr\Documents\GitHub\net2mat>net2mat test_data/GasLib-11.net example1.mat
+...\net2mat>net2mat test_data/GasLib-11.net example1.mat
 Opened test_data/GasLib-11.net with success
 Fetched data for nodes, found 11 nodes
 Fetched data for connections, found 11 connections
@@ -19,7 +19,7 @@ Created the example1.mat file
 Wrote everithing
 Done
 
-C:\Users\kipr\Documents\GitHub\net2mat>net2mat C:\Users\kipr\Documents\GitHub\net2mat\test_data\GasLib-11.net C:\Users\kipr\Downloads
+...\net2mat>net2mat C:\Users\kipr\Documents\GitHub\net2mat\test_data\GasLib-11.net C:\Users\kipr\Downloads
 Opened C:\Users\kipr\Documents\GitHub\net2mat\test_data\GasLib-11.net with success
 Fetched data for nodes, found 11 nodes
 Fetched data for connections, found 11 connections
